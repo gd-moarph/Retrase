@@ -57,13 +57,12 @@ interface DetailItem {
 export function ProductRecallDialog({ recall, open, onOpenChange }: Props) {
   if (!recall) return null;
 
-  const localPdfUrl = recall.officialPdfDocumentId
+  const hasPdf = Boolean(
+    recall.officialPdfDocumentId || recall.sourceUrl?.toLowerCase().includes(".pdf")
+  );
+  const localPdfUrl = hasPdf
     ? `/api/produse-generale/${recall.id}/pdf`
     : null;
-  const officialPdfUrl = recall.sourceUrl?.toLowerCase().includes(".pdf")
-    ? recall.sourceUrl
-    : null;
-  const displayPdfUrl = localPdfUrl || officialPdfUrl;
   const title = recall.productName || recall.title || "Produs retras";
   const subtitle = [recall.brand, recall.retailer].filter(Boolean).join(" - ");
   const detailItems: DetailItem[] = [];
@@ -120,15 +119,15 @@ export function ProductRecallDialog({ recall, open, onOpenChange }: Props) {
               </div>
             </div>
 
-            <div className="hidden gap-3 pt-3 md:grid md:grid-cols-2 lg:grid-cols-4">
+            <div className="hidden gap-2 pt-2.5 md:grid md:grid-cols-2 lg:grid-cols-5">
               {detailItems.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <div key={item.label} className="grid grid-cols-[auto_1fr] gap-x-2 rounded-md border bg-muted/30 p-2">
-                    <Icon className={`mt-0.5 h-4 w-4 ${item.warning ? "text-amber-500" : "text-muted-foreground"}`} />
+                  <div key={item.label} className="grid grid-cols-[auto_1fr] gap-x-1.5 rounded-md border bg-muted/30 px-2 py-1.5">
+                    <Icon className={`mt-0.5 h-3.5 w-3.5 ${item.warning ? "text-amber-500" : "text-muted-foreground"}`} />
                     <div className="min-w-0">
-                      <p className="text-xs text-muted-foreground">{item.label}</p>
-                      <div className="truncate text-sm font-medium">{item.value}</div>
+                      <p className="text-[11px] leading-4 text-muted-foreground">{item.label}</p>
+                      <div className="truncate text-xs font-medium leading-4">{item.value}</div>
                     </div>
                   </div>
                 );
@@ -138,11 +137,11 @@ export function ProductRecallDialog({ recall, open, onOpenChange }: Props) {
 
           <div className="min-h-0 bg-muted/20 p-2 sm:p-3">
             <div className="h-full min-h-0 overflow-hidden rounded-md border bg-background">
-              {displayPdfUrl ? (
+              {localPdfUrl ? (
                 <iframe
                   title={`PDF ${title}`}
-                  src={displayPdfUrl}
-                  sandbox="allow-downloads"
+                  src={localPdfUrl}
+                  sandbox="allow-downloads allow-same-origin"
                   className="h-full min-h-[70dvh] w-full border-0"
                 />
               ) : (

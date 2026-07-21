@@ -118,6 +118,20 @@ export async function signedSourceDocumentUrl(objectKey: string, expiresIn = 300
   );
 }
 
+export async function getSourceObject(objectKey: string): Promise<Buffer> {
+  const value = config();
+  const response = await storageClient().send(new GetObjectCommand({
+    Bucket: value.bucket,
+    Key: objectKey,
+  }));
+
+  if (!response.Body) {
+    throw new Error(`Stored object has no body: ${objectKey}`);
+  }
+
+  return Buffer.from(await response.Body.transformToByteArray());
+}
+
 export function assertBufferSha256(body: Buffer, expectedSha256: string): void {
   if (sha256Buffer(body) !== expectedSha256) {
     throw new Error("Source document SHA-256 mismatch");
