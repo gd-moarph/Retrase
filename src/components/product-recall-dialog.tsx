@@ -57,12 +57,13 @@ interface DetailItem {
 export function ProductRecallDialog({ recall, open, onOpenChange }: Props) {
   if (!recall) return null;
 
-  const hasPdf = Boolean(
-    recall.officialPdfDocumentId || recall.sourceUrl?.toLowerCase().includes(".pdf")
-  );
-  const localPdfUrl = hasPdf
+  const localPdfUrl = recall.officialPdfDocumentId
     ? `/api/produse-generale/${recall.id}/pdf`
     : null;
+  const officialPdfUrl = recall.sourceUrl?.toLowerCase().includes(".pdf")
+    ? recall.sourceUrl
+    : null;
+  const displayPdfUrl = localPdfUrl || officialPdfUrl;
   const title = recall.productName || recall.title || "Produs retras";
   const subtitle = [recall.brand, recall.retailer].filter(Boolean).join(" - ");
   const detailItems: DetailItem[] = [];
@@ -137,10 +138,10 @@ export function ProductRecallDialog({ recall, open, onOpenChange }: Props) {
 
           <div className="min-h-0 bg-muted/20 p-2 sm:p-3">
             <div className="h-full min-h-0 overflow-hidden rounded-md border bg-background">
-              {localPdfUrl ? (
+              {displayPdfUrl ? (
                 <iframe
                   title={`PDF ${title}`}
-                  src={localPdfUrl}
+                  src={displayPdfUrl}
                   sandbox="allow-downloads allow-same-origin"
                   className="h-full min-h-[70dvh] w-full border-0"
                 />
