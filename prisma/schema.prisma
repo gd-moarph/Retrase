@@ -1,0 +1,260 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SourceType {
+  ANSVSA
+  ANM_DISCONTINUITY
+  ANM_NOMENCLATURE
+}
+
+enum SourceRunStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+  NO_CHANGE
+  CANCELED
+}
+
+enum SourceDocumentParseStatus {
+  PENDING
+  PARSED
+  PARTIAL
+  FAILED
+}
+
+model SourceRun {
+  id                  String          @id @default(cuid())
+  sourceType          SourceType
+  status              SourceRunStatus @default(RUNNING)
+  startedAt           DateTime        @default(now())
+  finishedAt          DateTime?
+  heartbeatAt         DateTime?
+  itemsFound          Int             @default(0)
+  itemsInserted       Int             @default(0)
+  itemsUpdated        Int             @default(0)
+  documentsDownloaded Int             @default(0)
+  errorMessage        String?
+  metadataJson        Json?
+
+  documents SourceDocument[]
+
+  @@index([sourceType, startedAt])
+  @@map("source_runs")
+}
+
+model SourceDocument {
+  id            String                    @id @default(cuid())
+  sourceType    SourceType
+  url           String
+  canonicalUrl  String?
+  mimeType      String?
+  fileName      String?
+  fileSize      Int?
+  sha256        String?
+  objectKey     String?                   @unique
+  objectETag    String?
+  storedAt      DateTime?
+  extractedText String?
+  fetchedAt     DateTime                  @default(now())
+  parserVersion String?
+  parseStatus   SourceDocumentParseStatus @default(PENDING)
+  parseError    String?
+  sourceRunId   String?
+  sourceRun     SourceRun?                @relation(fields: [sourceRunId], references: [id], onDelete: SetNull)
+
+  sourceItems        SourceItem[]
+  officialPdfProduct ProductRecall[] @relation("OfficialPdf")
+
+  @@unique([sourceType, sha256])
+  @@index([sourceType, fetchedAt])
+  @@map("source_documents")
+}
+
+model SourceItem {
+  id               String          @id @default(cuid())
+  sourceType       SourceType
+  externalId       String
+  sourceUrl        String
+  title            String?
+  normalizedText   String?
+  rawJson          Json?
+  sourceDocumentId String?
+  sourceDocument   SourceDocument? @relation(fields: [sourceDocumentId], references: [id], onDelete: SetNull)
+  publishedAt      DateTime?
+  firstSeenAt      DateTime        @default(now())
+  lastSeenAt       DateTime        @updatedAt
+  contentHash      String?
+
+  versions                SourceItemVersion[]
+  medicineDiscontinuities MedicineDiscontinuity[]
+  productRecalls          ProductRecall[]
+
+  @@unique([sourceType, externalId])
+  @@index([sourceType, lastSeenAt])
+  @@map("source_items")
+}
+
+model SourceItemVersion {
+  id           String     @id @default(cuid())
+  sourceItemId String
+  sourceItem   SourceItem @relation(fields: [sourceItemId], references: [id], onDelete: Cascade)
+  contentHash  String
+  rawJson      Json?
+  createdAt    DateTime   @default(now())
+
+  @@map("source_item_versions")
+}
+
+model Medicine {
+  id                       String    @id @default(cuid())
+  sourceKey                String    @unique
+  commercialName           String
+  normalizedCommercialName String
+  dci                      String?
+  normalizedDci            String?
+  pharmaceuticalForm       String?
+  concentration            String?
+  atcCode                  String?
+  cimCode                  String
+  appHolder                String?
+  producer                 String?
+  prescription             String?
+  packageDescription       String?
+  rcpUrl                   String?
+  prospectUrl              String?
+  packageUrl               String?
+  contentHash              String
+  sourceUpdatedAt          DateTime?
+  isActive                 Boolean   @default(true)
+  removedAt                DateTime?
+  firstSeenAt              DateTime  @default(now())
+  lastSeenAt               DateTime  @updatedAt
+
+  discontinuities MedicineDiscontinuity[]
+
+  @@index([cimCode])
+  @@index([normalizedCommercialName])
+  @@index([normalizedDci])
+  @@index([atcCode])
+  @@index([isActive])
+  @@map("medicines")
+}
+
+model MedicineDiscontinuity {
+  id                       String     @id @default(cuid())
+  sourceItemId             String
+  sourceItem               SourceItem @relation(fields: [sourceItemId], references: [id], onDelete: Cascade)
+  medicineId               String?
+  medicine                 Medicine?  @relation(fields: [medicineId], references: [id], onDelete: SetNull)
+  commercialName           String?
+  normalizedCommercialName String?
+  pharmaceuticalForm       String?
+  concentration            String?
+  authorizationHolder      String?
+  holderCountry            String?
+  dci                      String?
+  normalizedDci            String?
+  addressDate              String?
+  notificationType         String?
+  estimatedResumeDateText  String?
+  observations             String?
+  rawRowText               String?
+  rowNumber                Int?
+  sourcePage               Int?
+  stableKey                String     @unique
+  isPresentInLatest        Boolean    @default(true)
+  firstSeenAt              DateTime   @default(now())
+  lastSeenAt               DateTime   @updatedAt
+
+  versions MedicineDiscontinuityVersion[]
+
+  @@index([normalizedCommercialName])
+  @@index([normalizedDci])
+  @@index([isPresentInLatest])
+  @@map("medicine_discontinuities")
+}
+
+model MedicineDiscontinuityVersion {
+  id                      String                @id @default(cuid())
+  medicineDiscontinuityId String
+  medicineDiscontinuity   MedicineDiscontinuity @relation(fields: [medicineDiscontinuityId], references: [id], onDelete: Cascade)
+  contentHash             String
+  rawJson                 Json?
+  rawRowText              String?
+  createdAt               DateTime              @default(now())
+
+  @@map("medicine_discontinuity_versions")
+}
+
+model ProductRecall {
+  id                    String          @id @default(cuid())
+  sourceItemId          String
+  sourceItem            SourceItem      @relation(fields: [sourceItemId], references: [id], onDelete: Cascade)
+  title                 String?
+  productName           String?
+  normalizedProductName String?
+  brand                 String?
+  normalizedBrand       String?
+  retailer              String?
+  normalizedRetailer    String?
+  category              String?
+  subcategory           String?
+  quantity              String?
+  lotNumber             String?
+  batchNumber           String?
+  barcode               String?
+  expiryDates           String[]
+  reason                String?
+  riskType              String?
+  riskLevel             String?
+  consumerInstruction   String?
+  refundInstruction     String?
+  contactPhone          String?
+  contactEmail          String?
+  country               String          @default("Romania")
+  sourceUrl             String?
+  officialPdfDocumentId String?
+  officialPdfDocument   SourceDocument? @relation("OfficialPdf", fields: [officialPdfDocumentId], references: [id], onDelete: SetNull)
+  imageUrls             String[]
+  publishedAt           DateTime?
+  firstSeenAt           DateTime        @default(now())
+  lastSeenAt            DateTime        @updatedAt
+  rawJson               Json?
+
+  versions ProductRecallVersion[]
+
+  @@index([normalizedProductName])
+  @@index([normalizedBrand])
+  @@index([normalizedRetailer])
+  @@index([barcode])
+  @@map("product_recalls")
+}
+
+model ProductRecallVersion {
+  id              String        @id @default(cuid())
+  productRecallId String
+  productRecall   ProductRecall @relation(fields: [productRecallId], references: [id], onDelete: Cascade)
+  contentHash     String
+  rawJson         Json?
+  createdAt       DateTime      @default(now())
+
+  @@map("product_recall_versions")
+}
+
+model RateLimit {
+  id          String   @id @default(cuid())
+  key         String
+  count       Int      @default(1)
+  windowStart DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  @@unique([key, windowStart])
+  @@index([createdAt])
+  @@map("rate_limits")
+}

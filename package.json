@@ -1,0 +1,67 @@
+{
+  "name": "retrase-ro",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "node server.js",
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "cron:farmaceutice": "tsx src/cron/cron-farmaceutice.ts",
+    "cron:produse-generale": "tsx src/cron/cron-produse-generale.ts",
+    "cron:toate": "tsx src/cron/cron-toate.ts",
+    "import:anm-discontinuities": "tsx src/cli/import.ts discontinuities",
+    "import:anm-nomenclature": "tsx src/cli/import.ts nomenclature",
+    "import:ansvsa": "tsx src/cli/import.ts ansvsa",
+    "import:all": "tsx src/cli/import.ts all"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1092.0",
+    "@aws-sdk/s3-request-presigner": "3.1092.0",
+    "@base-ui/react": "^1.5.0",
+    "@prisma/client": "^6.5.0",
+    "cheerio": "^1.2.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
+    "date-fns": "^4.4.0",
+    "exceljs": "4.4.0",
+    "lucide-react": "^1.20.0",
+    "next": "16.2.9",
+    "next-themes": "^0.4.6",
+    "pdf-parse": "2.4.5",
+    "pg": "^8.22.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "read-excel-file": "9.3.4",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.6.0",
+    "tw-animate-css": "^1.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/pg": "^8.20.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.9",
+    "prisma": "^6.5.0",
+    "shadcn": "4.11.0",
+    "tailwindcss": "^4",
+    "tsx": "^4.22.4",
+    "typescript": "^5",
+    "vitest": "^4.1.9"
+  },
+  "overrides": {
+    "exceljs": {
+      "uuid": "11.1.1"
+    }
+  }
+}

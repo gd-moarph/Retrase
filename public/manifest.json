@@ -1,0 +1,19 @@
+{
+  "name": "Retrase.ro",
+  "short_name": "Retrase.ro",
+  "description": "Alerte pentru medicamente și produse retrase din România. Urmărește medicamente, produse, branduri sau categorii.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1447E6",
+  "lang": "ro-RO",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/retrase-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
