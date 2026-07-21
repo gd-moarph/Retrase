@@ -139,12 +139,18 @@ export function ProductRecallDialog({ recall, open, onOpenChange }: Props) {
           <div className="min-h-0 bg-muted/20 p-2 sm:p-3">
             <div className="h-full min-h-0 overflow-hidden rounded-md border bg-background">
               {displayPdfUrl ? (
-                <iframe
-                  title={`PDF ${title}`}
-                  src={displayPdfUrl}
-                  sandbox="allow-downloads allow-same-origin"
+                <object
+                  aria-label={`PDF ${title}`}
+                  data={displayPdfUrl}
+                  type="application/pdf"
                   className="h-full min-h-[70dvh] w-full border-0"
-                />
+                >
+                  <div className="flex h-full min-h-[70dvh] items-center justify-center text-muted-foreground">
+                    <a href={displayPdfUrl} target="_blank" rel="noopener noreferrer" className="text-sm underline">
+                      Deschide documentul PDF
+                    </a>
+                  </div>
+                </object>
               ) : (
                 <div className="flex h-full min-h-[70dvh] items-center justify-center text-muted-foreground">
                   <div className="text-center">
