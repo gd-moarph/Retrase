@@ -24,7 +24,6 @@ export async function GET(request: Request) {
       title: true,
       brand: true,
       retailer: true,
-      category: true,
       quantity: true,
       publishedAt: true,
       sourceUrl: true,
@@ -37,7 +36,6 @@ export async function GET(request: Request) {
       Titlu: row.title,
       Brand: row.brand,
       Retailer: row.retailer,
-      Categorie: row.category,
       Cantitate: row.quantity,
       "Data Publicare": formatDate(row.publishedAt),
       Sursa: {

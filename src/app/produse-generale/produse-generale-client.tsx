@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ProductRecallDialog } from "@/components/product-recall-dialog";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -81,21 +80,6 @@ export function ProduseGeneraleClient() {
     };
   }, [searchInput]);
 
-  const categoryBadge = (category: string | null) => {
-    if (!category) return null;
-    const colors: Record<string, string> = {
-      alimente: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
-      lactate: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-      carne: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-      bauturi: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400",
-      dulciuri: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400",
-    };
-    for (const [key, className] of Object.entries(colors)) {
-      if (category.toLowerCase().includes(key)) return <Badge className={className}>{category}</Badge>;
-    }
-    return <Badge variant="outline">{category}</Badge>;
-  };
-
   return (
     <div className="flex min-h-dvh flex-col">
       <SiteHeader />
@@ -152,16 +136,14 @@ export function ProduseGeneraleClient() {
                       <TableRow>
                         <TableHead>Produs</TableHead>
                         <TableHead className="hidden sm:table-cell">Brand / Retailer</TableHead>
-                        <TableHead className="hidden md:table-cell">Categorie</TableHead>
-                        <TableHead className="hidden lg:table-cell">Motiv</TableHead>
                         <TableHead className="hidden md:table-cell">Dată</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {loading ? (
-                        <TableRow><TableCell colSpan={5} className="py-8 text-center text-muted-foreground">Se încarcă...</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={3} className="py-8 text-center text-muted-foreground">Se încarcă...</TableCell></TableRow>
                       ) : items.length === 0 ? (
-                        <TableRow><TableCell colSpan={5} className="py-8 text-center text-muted-foreground">Niciun rezultat.</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={3} className="py-8 text-center text-muted-foreground">Niciun rezultat.</TableCell></TableRow>
                       ) : items.map((item) => (
                         <TableRow key={item.id} className="cursor-pointer" onClick={() => {
                           setDialogRecall(item);
@@ -170,10 +152,6 @@ export function ProduseGeneraleClient() {
                           <TableCell className="max-w-[380px] whitespace-normal break-words py-2 font-medium leading-5">{item.productName || item.title || "-"}</TableCell>
                           <TableCell className="hidden max-w-[260px] whitespace-normal break-words py-2 leading-5 text-muted-foreground sm:table-cell">
                             {[item.brand, item.retailer].filter(Boolean).join(", ") || "-"}
-                          </TableCell>
-                          <TableCell className="hidden max-w-[220px] whitespace-normal break-words py-2 leading-5 md:table-cell">{categoryBadge(item.category)}</TableCell>
-                          <TableCell className="hidden max-w-[320px] whitespace-normal break-words py-2 leading-5 text-muted-foreground lg:table-cell">
-                            {item.reason || "-"}
                           </TableCell>
                           <TableCell className="hidden whitespace-nowrap py-2 text-muted-foreground md:table-cell">
                             {item.publishedAt ? new Date(item.publishedAt).toLocaleDateString("ro-RO", { timeZone: "Europe/Bucharest" }) : "-"}
